@@ -1,0 +1,60 @@
+<%= form_with(model: [:admin, @theme, @question], class: "space-y-8",
+   data: { controller: "question-form" }) do |f| %>
+ <div class="space-y-6 bg-white rounded-lg shadow p-6">
+   <div>
+     <%= f.label :content, "Question", class: "block text-sm font-medium text-gray-700" %>
+     <%= f.text_area :content, rows: 3, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+   </div>
+
+   <div>
+     <%= f.label :question_type, "Type de question", class: "block text-sm font-medium text-gray-700" %>
+     <%= f.select :question_type,
+         QvtQuestion.question_types.map { |key, _| [key.humanize, key] },
+         {},
+         class: "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md",
+         data: { action: "change->question-form#toggleChoices" } %>
+   </div>
+
+   <div class="flex items-start">
+     <div class="flex items-center h-5">
+       <%= f.check_box :required, class: "h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" %>
+     </div>
+     <div class="ml-3 text-sm">
+       <%= f.label :required, "Question obligatoire", class: "font-medium text-gray-700" %>
+       <p class="text-gray-500">L'employé devra obligatoirement répondre à cette question</p>
+     </div>
+   </div>
+
+   <div id="choices-section" class="space-y-4" data-question-form-target="choicesSection">
+     <div class="flex items-center justify-between">
+       <h3 class="text-lg font-medium text-gray-900">Choix de réponses</h3>
+       <button type="button" data-action="click->question-form#addChoice" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-indigo-700 bg-indigo-100 hover:bg-indigo-200">
+         Ajouter un choix
+       </button>
+     </div>
+     <div data-question-form-target="choicesList" class="space-y-4">
+       <%= f.fields_for :qvt_choices do |choice_form| %>
+         <%= render 'choice_fields', f: choice_form %>
+       <% end %>
+     </div>
+   </div>
+
+   <div class="flex justify-end space-x-3">
+     <%= link_to "Annuler", admin_qvt_theme_path(@theme), class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" %>
+     <%= f.submit class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700" %>
+   </div>
+ </div>
+
+ <template data-question-form-target="choiceTemplate">
+   <div class="choice-fields flex items-center space-x-4">
+     <div class="flex-grow">
+       <input type="text" name="qvt_question[qvt_choices_attributes][NEW_RECORD][content]" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Texte du choix">
+     </div>
+     <button type="button" data-action="click->question-form#removeChoice" class="inline-flex items-center p-1.5 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200">
+       <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+       </svg>
+     </button>
+   </div>
+ </template>
+<% end %>

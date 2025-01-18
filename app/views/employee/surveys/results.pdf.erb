@@ -1,0 +1,108 @@
+<div class="header">
+  <h1 class="title">Vos résultats : <%= @survey.title %></h1>
+</div>
+
+<div class="section">
+  <h2 class="category-title">Votre profil de valeurs</h2>
+  <p class="subtitle">Plus la note est élevée, plus cette catégorie de valeurs est importante pour vous.</p>
+
+  <div style="width: 100%; display: flex; justify-content: center; align-items: center;">
+    <div style="width: 800px; height: 400px; position: relative;">
+      <svg viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet">
+        <% categories = @category_averages.keys %>
+        <% values = @category_averages.values %>
+        <% cx = 400 %>
+        <% cy = 200 %>
+        <% radius = 150 %>
+        <% angle_step = 360.0 / categories.length %>
+
+        <!-- Cercles du radar -->
+        <% 10.times do |i| %>
+          <% r = radius * ((i + 1) / 10.0) %>
+          <circle cx="<%= cx %>" cy="<%= cy %>" r="<%= r %>"
+                  fill="none" stroke="#E5E7EB" stroke-width="1"/>
+          <text x="<%= cx - 20 %>" y="<%= cy - r %>" font-size="10"><%= i + 1 %></text>
+        <% end %>
+
+        <!-- Points et lignes -->
+        <% points = categories.map.with_index do |cat, i| %>
+          <% angle = (i * angle_step - 90) * Math::PI / 180 %>
+          <% r = radius * (values[i] / 10.0) %>
+          <% [cx + r * Math.cos(angle), cy + r * Math.sin(angle)] %>
+        <% end %>
+
+        <!-- Zone remplie -->
+        <polygon points="<%= points.map { |x, y| "#{x},#{y}" }.join(' ') %>"
+                 fill="rgba(99, 102, 241, 0.2)"
+                 stroke="rgb(99, 102, 241)"
+                 stroke-width="2"/>
+
+        <!-- Points et notes -->
+        <% points.each_with_index do |(x, y), i| %>
+          <circle cx="<%= x %>" cy="<%= y %>" r="4" fill="rgb(99, 102, 241)"/>
+          <text x="<%= x %>" y="<%= y - 10 %>"
+                text-anchor="middle"
+                font-size="12"
+                fill="rgb(99, 102, 241)">
+            <%= values[i] %>
+          </text>
+        <% end %>
+
+        <!-- Labels -->
+        <% categories.each_with_index do |cat, i| %>
+          <% angle = (i * angle_step - 90) * Math::PI / 180 %>
+          <% x = cx + (radius + 30) * Math.cos(angle) %>
+          <% y = cy + (radius + 30) * Math.sin(angle) %>
+          <text x="<%= x %>" y="<%= y %>"
+                text-anchor="middle"
+                dominant-baseline="middle"
+                font-size="12">
+            <%= cat %>
+          </text>
+        <% end %>
+      </svg>
+    </div>
+  </div>
+
+  <div class="stats">
+    <% @category_averages.each do |category, average| %>
+      <div class="stat-item">
+        <h3 class="value-title"><%= category %></h3>
+        <div>
+          <span style="font-size: 20px; font-weight: bold; color: #4F46E5"><%= average %></span>
+          <span style="color: #6B7280">/10</span>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="category-title">Détail de vos réponses</h2>
+  <% @company_values.includes(:value_category).group_by(&:value_category).each do |category, values| %>
+    <div class="value-card">
+      <h3 class="value-title"><%= category.name %></h3>
+      <% values.each do |value| %>
+        <% response = @responses.find { |r| r.company_value_id == value.id } %>
+        <div style="margin-bottom: 15px; padding: 10px; background-color: #F9FAFB; border-radius: 6px;">
+          <div style="display: flex; justify-content: space-between;">
+            <div>
+              <h4 style="color: #374151; font-weight: 500; margin: 0;"><%= value.name %></h4>
+              <p style="color: #6B7280; margin-top: 5px;"><%= value.description %></p>
+            </div>
+            <div>
+              <span style="font-size: 20px; font-weight: bold; color: #4F46E5">
+                <%= response&.rating || "N/A" %>
+              </span>
+              <span style="color: #6B7280">/10</span>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<div class="footer">
+  Document généré le <%= l Time.current, format: :long %>
+</div>

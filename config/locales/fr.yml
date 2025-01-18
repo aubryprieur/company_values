@@ -1,0 +1,88 @@
+fr:
+  date:
+    formats:
+      default: "%d/%m/%Y"
+      short: "%e %b"
+      long: "%e %B %Y"
+    day_names:
+      - dimanche
+      - lundi
+      - mardi
+      - mercredi
+      - jeudi
+      - vendredi
+      - samedi
+    abbr_day_names:
+      - dim
+      - lun
+      - mar
+      - mer
+      - jeu
+      - ven
+      - sam
+    month_names:
+      - ~
+      - janvier
+      - février
+      - mars
+      - avril
+      - mai
+      - juin
+      - juillet
+      - août
+      - septembre
+      - octobre
+      - novembre
+      - décembre
+    abbr_month_names:
+      - ~
+      - jan.
+      - fév.
+      - mar.
+      - avr.
+      - mai
+      - juin
+      - juil.
+      - août
+      - sept.
+      - oct.
+      - nov.
+      - déc.
+    order:
+      - :day
+      - :month
+      - :year
+  time:
+    formats:
+      default: "%d/%m/%Y %H:%M"
+      short: "%d %b %H:%M"
+      long: "%d %B %Y %H:%M"
+  devise:
+    sessions:
+      signed_in: "Connexion réussie."
+      signed_out: "Déconnexion réussie."
+      already_signed_out: "Déconnexion déjà effectuée."
+    failure:
+      already_authenticated: "Vous êtes déjà connecté."
+      unauthenticated: "Vous devez vous connecter ou vous inscrire pour continuer."
+      not_found_in_database: "Email ou mot de passe incorrect."
+      invalid: "Email ou mot de passe incorrect."
+      timeout: "Votre session a expiré, veuillez vous reconnecter pour continuer."
+    registrations:
+      signed_up: "Bienvenue ! Votre compte a été créé avec succès."
+      signed_up_but_unconfirmed: "Un message avec un lien de confirmation a été envoyé à votre adresse email."
+      signed_up_but_inactive: "Votre compte a bien été créé. Cependant, nous n'avons pas pu vous connecter car votre compte n'est pas encore activé."
+      signed_up_but_locked: "Votre compte a bien été créé. Cependant, nous n'avons pas pu vous connecter car votre compte est verrouillé."
+  activerecord:
+    errors:
+      messages:
+        record_invalid: "La validation a échoué : %{errors}"
+        restrict_dependent_destroy:
+          has_one: "Impossible de supprimer l'enregistrement car un(e) %{record} dépendant(e) existe"
+          has_many: "Impossible de supprimer l'enregistrement car des %{record} dépendants existent"
+        blank: "ne peut pas être vide"
+        inclusion: "n'est pas inclus(e) dans la liste"
+
+    attributes:
+      company:
+        organization_type: "Type d'organisation"

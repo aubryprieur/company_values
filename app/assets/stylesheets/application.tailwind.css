@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.value-card {
+  transition: all 0.3s ease-in-out;
+}
+
+.value-card.hidden {
+  display: none;
+  opacity: 0;
+  transform: translateX(100%);
+}
+
+.value-card {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.rating-option input:checked + div {
+  @apply bg-indigo-100 border-indigo-500;
+}
+
+.rating-option div:hover {
+  @apply bg-indigo-50 border-indigo-500;
+}
+
+@layer components {
+  .radar-chart text {
+    @apply fill-gray-600 text-sm;
+  }
+
+  .radar-chart .recharts-polar-grid-line {
+    @apply stroke-gray-200;
+  }
+}
+
+.sort-link {
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.sort-link:hover {
+  text-decoration: none;
+}
+
+.sort-icon {
+  display: inline-block;
+  margin-left: 0.5rem;
+}

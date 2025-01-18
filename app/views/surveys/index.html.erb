@@ -1,0 +1,112 @@
+<div class="md:flex md:items-center md:justify-between mb-8">
+  <div class="min-w-0 flex-1">
+    <h2 class="text-2xl font-bold text-gray-900 sm:text-3xl">Sondages</h2>
+  </div>
+  <div class="mt-4 flex space-x-3 md:mt-0">
+    <% unless current_company.surveys.company_values.exists? %>
+      <%= link_to new_survey_path(type: 'company_values'), class: "inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700" do %>
+        <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Nouveau Sondage Valeurs
+      <% end %>
+    <% end %>
+
+    <% unless current_company.surveys.qvt.exists? %>
+      <%= link_to new_survey_path(type: 'qvt'), class: "inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700" do %>
+        <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Nouveau Sondage QVT
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+  <% @surveys.each do |survey| %>
+    <% if survey.company_values? %>
+      <%# Card pour le sondage Valeurs %>
+      <div class="bg-white overflow-hidden shadow rounded-lg divide-y divide-gray-200">
+        <div class="px-4 py-5 sm:p-6">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-medium text-gray-900"><%= survey.title %></h3>
+            <span class="<%= survey.closed? ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' %> inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+              <%= survey.closed? ? 'Terminé' : 'En cours' %>
+            </span>
+          </div>
+          <div class="mt-2">
+            <p class="text-sm text-gray-500">
+              Date de fin : <%= l survey.end_date, format: :long %>
+            </p>
+            <% if company_signed_in? %>
+              <p class="mt-1 text-sm text-gray-500">
+                <%= pluralize(survey.company_values.count, 'valeur') %>
+                · <%= pluralize(survey.responses.count, 'réponse') %>
+              </p>
+            <% end %>
+          </div>
+          <div class="mt-4 flex flex-wrap gap-3">
+            <%= link_to survey_path(survey),
+                class: "inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 hover:text-gray-900" do %>
+              <svg class="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+              </svg>
+              Diagnostic
+            <% end %>
+            <%= link_to custom_values_survey_path(survey),
+                class: "inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700" do %>
+              <svg class="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
+              </svg>
+              Propositions
+            <% end %>
+
+            <% if company_signed_in? && !survey.closed? %>
+              <%= link_to edit_survey_path(survey),
+                  class: "inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" do %>
+                <svg class="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                </svg>
+                Modifier
+              <% end %>
+            <% end %>
+
+            <% if survey.closed? %>
+              <%= link_to rankings_survey_path(survey),
+                  class: "inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700" do %>
+                <svg class="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+                </svg>
+                Résultats
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% else %>
+      <%# Card simple pour le sondage QVT %>
+      <div class="bg-white overflow-hidden shadow rounded-lg divide-y divide-gray-200">
+        <div class="px-4 py-5 sm:p-6">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-medium text-gray-900"><%= survey.title %></h3>
+            <span class="<%= survey.closed? ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' %> inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+              <%= survey.closed? ? 'Terminé' : 'En cours' %>
+            </span>
+          </div>
+          <div class="mt-2">
+            <p class="text-sm text-gray-500">
+              Date de fin : <%= l survey.end_date, format: :long %>
+            </p>
+          </div>
+          <div class="mt-4 flex space-x-3">
+            <%= link_to 'Modifier', edit_survey_path(survey), class: "inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" %>
+            <%= link_to 'Résultats', survey.qvt? ? qvt_results_survey_path(survey) : results_survey_path(survey), class: "inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700" %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  <% end %>
+</div>
+

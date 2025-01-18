@@ -1,0 +1,105 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- En-tête -->
+  <div class="md:flex md:items-center md:justify-between mb-8">
+    <div class="min-w-0 flex-1">
+      <h2 class="text-2xl font-bold text-gray-900"><%= @survey.title %></h2>
+      <p class="mt-2 text-sm text-gray-500">
+        <%= @survey.closed? ? 'Terminé' : 'En cours' %> ·
+        Date de fin : <%= l @survey.end_date, format: :long %>
+      </p>
+    </div>
+    <%= link_to surveys_path, class: "ml-3 inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" do %>
+      <svg class="mr-2 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+      </svg>
+      Retour aux sondages
+    <% end %>
+  </div>
+
+  <!-- Statistiques globales -->
+  <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+    <div class="px-4 py-5 sm:p-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">Statistiques globales</h3>
+      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Taux de participation</dt>
+          <dd class="mt-1 text-3xl font-semibold text-indigo-600">
+            <%= (@responding_employees.to_f / @total_employees * 100).round(1) %>%
+          </dd>
+          <dd class="mt-1 text-sm text-gray-500">
+            <%= @responding_employees %>/<%= @total_employees %> employés
+          </dd>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Résultats par thème -->
+  <div class="space-y-8">
+    <% @theme_stats.each do |theme_stat| %>
+      <div class="bg-white shadow sm:rounded-lg overflow-hidden">
+        <div class="px-4 py-5 sm:px-6">
+          <h3 class="text-lg leading-6 font-medium text-gray-900">
+            <%= theme_stat[:theme].name %>
+          </h3>
+        </div>
+
+        <div class="border-t border-gray-200">
+          <div class="px-4 py-5 sm:px-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <% theme_stat[:questions].each do |question_data| %>
+                <div>
+                  <h4 class="text-base font-medium text-gray-900 mb-4">
+                    <%= question_data[:question].content %>
+                  </h4>
+
+                  <% case question_data[:question].question_type %>
+                  <% when 'single_choice', 'multiple_choice' %>
+                    <div class="mb-4">
+                      <div class="w-full bg-white p-4 rounded-lg"
+                           data-controller="qvt-chart"
+                           data-qvt-chart-data-value="<%= question_data[:stats].to_json %>"
+                           data-qvt-chart-title-value="<%= question_data[:question].content %>"
+                           data-qvt-chart-theme-value="<%= theme_stat[:theme].id %>">
+                      </div>
+                      <div class="mt-2">
+                        <% question_data[:stats].each do |stat| %>
+                          <div class="text-sm text-gray-500">
+                            <%= stat[:label] %>: <%= stat[:value] %>% (<%= stat[:count] %> réponses)
+                          </div>
+                        <% end %>
+                      </div>
+                    </div>
+                  <% when 'open' %>
+                    <div class="bg-gray-50 rounded-lg p-4 space-y-2">
+                      <% if question_data[:stats].any? %>
+                        <% question_data[:stats].each do |answer| %>
+                          <div class="p-3 bg-white rounded shadow-sm">
+                            <p class="text-sm text-gray-600"><%= answer %></p>
+                          </div>
+                        <% end %>
+                      <% else %>
+                        <p class="text-sm text-gray-500 italic">Aucune réponse fournie</p>
+                      <% end %>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Export PDF -->
+  <div class="mt-8 flex justify-end">
+    <%= link_to qvt_results_survey_path(@survey, format: :pdf),
+        class: "inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700" do %>
+      <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      Exporter en PDF
+    <% end %>
+  </div>
+</div>

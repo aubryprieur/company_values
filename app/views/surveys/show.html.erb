@@ -1,0 +1,151 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="md:flex md:items-center md:justify-between mb-8">
+    <div class="min-w-0 flex-1">
+      <h2 class="text-2xl font-bold text-gray-900"><%= @survey.title %></h2>
+      <p class="mt-2 text-sm text-gray-500">
+        <%= @survey.closed? ? 'Terminé' : 'En cours' %> · Date de fin : <%= l @survey.end_date, format: :long %>
+      </p>
+    </div>
+    <%= link_to surveys_path, class: "ml-3 inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" do %>
+      <svg class="mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+      </svg>
+      Retour aux sondages
+    <% end %>
+  </div>
+
+<!-- Statistiques filtrées par entreprise -->
+<div class="mb-8 bg-white shadow overflow-hidden sm:rounded-lg">
+  <div class="px-4 py-5 sm:p-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div>
+        <dt class="text-base font-normal text-gray-900">Taux de participation</dt>
+        <% total_employees = @survey.company.employees.count %>
+        <% responding_employees = @survey.responses.joins(:employee)
+                                        .where(employees: { company_id: @survey.company_id })
+                                        .select('DISTINCT employee_id').count %>
+        <% participation_rate = total_employees > 0 ? (responding_employees.to_f / total_employees * 100).round : 0 %>
+        <dd class="mt-1 flex justify-between items-baseline md:block lg:flex">
+          <div class="flex items-baseline text-2xl font-semibold text-indigo-600">
+            <%= participation_rate %>%
+          </div>
+        </dd>
+      </div>
+
+      <div>
+        <dt class="text-base font-normal text-gray-900">Employés participants</dt>
+        <dd class="mt-1 flex justify-between items-baseline md:block lg:flex">
+          <div class="flex items-baseline text-2xl font-semibold text-indigo-600">
+            <%= responding_employees %>
+            <span class="ml-2 text-sm font-medium text-gray-500">
+              sur <%= total_employees %> employés
+            </span>
+          </div>
+        </dd>
+      </div>
+
+       <div>
+         <dt class="text-base font-normal text-gray-900">Temps restant</dt>
+         <% remaining_days = (@survey.end_date.to_date - Date.current).to_i %>
+         <dd class="mt-1 flex justify-between items-baseline md:block lg:flex">
+           <div class="flex items-baseline text-2xl font-semibold <%= remaining_days.positive? ? 'text-indigo-600' : 'text-red-600' %>">
+             <%= remaining_days %> jours
+           </div>
+         </dd>
+       </div>
+     </div>
+   </div>
+ </div>
+
+<!-- Classement filtré par entreprise -->
+<% if @survey.company_values.any? %>
+  <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+    <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+      <h3 class="text-lg leading-6 font-medium text-gray-900">Classement des valeurs</h3>
+    </div>
+
+    <div class="border-t border-gray-200">
+      <ul class="divide-y divide-gray-200">
+        <% @survey.company_values.includes(:value_category)
+              .map { |value|
+                company_responses = value.responses.joins(:employee)
+                                       .where(employees: { company_id: @survey.company_id })
+                avg_rating = company_responses.average(:rating)&.round(2) || 0
+                responses_count = company_responses.count
+                [value, avg_rating, responses_count]
+              }
+              .sort_by { |_, avg, _| -avg }
+              .each_with_index do |(value, avg_rating, responses_count), index| %>
+          <li class="px-6 py-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0 w-8 text-2xl font-bold text-gray-400">
+                <%= index + 1 %>
+              </div>
+              <div class="flex-1">
+                <div class="flex items-center justify-between">
+                  <div class="flex-1">
+                    <h4 class="text-lg font-medium text-gray-900">
+                      <%= value.name %>
+                      <span class="ml-2 text-sm font-normal text-indigo-600">
+                        <%= value.value_category&.name %>
+                      </span>
+                    </h4>
+                    <p class="mt-1 text-sm text-gray-500">
+                      <%= value.description %>
+                    </p>
+                  </div>
+                  <div class="ml-6 flex-shrink-0">
+                    <% if responses_count > 0 %>
+                      <div class="text-center">
+                        <div class="text-3xl font-bold text-gray-900">
+                          <%= avg_rating %>/10
+                        </div>
+                        <div class="text-xs text-gray-500">
+                          moyenne sur <%= responses_count %> réponses
+                        </div>
+                      </div>
+                    <% else %>
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        Pas encore de réponse
+                      </span>
+                    <% end %>
+                  </div>
+                </div>
+                <% if responses_count > 0 %>
+                  <div class="mt-3">
+                    <div class="relative pt-1">
+                      <div class="overflow-hidden h-2 text-xs flex rounded bg-gray-200">
+                        <div class="bg-indigo-600 rounded"
+                             style="width:<%= (avg_rating / 10.0 * 100).round %>%">
+                        </div>
+                      </div>
+                    </div>
+                    <div class="mt-1 flex justify-between text-xs text-gray-500">
+                      <div>1</div>
+                      <div>10</div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+<% else %>
+  <div class="text-center py-12 bg-white shadow sm:rounded-lg">
+    <h3 class="mt-2 text-sm font-medium text-gray-900">Aucune valeur dans ce sondage</h3>
+    <p class="mt-1 text-sm text-gray-500">Contactez l'administrateur pour ajouter des valeurs.</p>
+  </div>
+<% end %>
+</div>
+<div class="flex justify-end mb-4">
+  <%= link_to survey_path(@survey, format: :pdf),
+    class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm" do %>
+    <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+    Exporter en PDF
+  <% end %>
+</div>

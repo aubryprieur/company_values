@@ -1,0 +1,13 @@
+<%# app/views/employee/surveys/_theme_status.html.erb %>
+<% completion_percentage = theme.completion_percentage(@survey, current_employee) %>
+<% answered_questions = theme.completed_questions(@survey, current_employee) %>
+<% total_questions = theme.qvt_questions.count %>
+
+<div class="flex items-center">
+  <div class="mr-3 text-sm text-gray-500">
+    <%= "#{answered_questions}/#{total_questions} questions" %>
+  </div>
+  <div class="flex-1 bg-gray-200 rounded-full h-2 w-24">
+    <div class="bg-indigo-600 h-2 rounded-full" style="width: <%= completion_percentage %>%"></div>
+  </div>
+</div>

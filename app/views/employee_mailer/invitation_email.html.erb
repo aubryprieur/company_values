@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <h1>Bienvenue chez <%= @employee.company.name %></h1>
+    <p>
+      Bonjour <%= @employee.first_name %>,
+    </p>
+    <p>
+      Vous avez été invité(e) à participer au sondage des valeurs de l'entreprise <%= @employee.company.name %>.
+    </p>
+    <p>
+      Pour accéder à votre compte, veuillez cliquer sur le lien suivant :
+      <%= link_to 'Activer mon compte', @url %>
+    </p>
+  </body>
+</html>
+
+# app/views/employee_mailer/invitation_email.text.erb
+Bienvenue chez <%= @employee.company.name %>
+
+Bonjour <%= @employee.first_name %>,
+
+Vous avez été invité(e) à participer au sondage des valeurs de l'entreprise <%= @employee.company.name %>.
+
+Pour accéder à votre compte, veuillez cliquer sur le lien suivant :
+<%= @url %>

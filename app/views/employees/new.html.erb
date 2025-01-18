@@ -1,0 +1,56 @@
+<div class="max-w-3xl mx-auto">
+  <div class="md:flex md:items-center md:justify-between mb-8">
+    <div class="min-w-0 flex-1">
+      <h2 class="text-2xl font-bold text-gray-900">Inviter un employé</h2>
+    </div>
+  </div>
+
+  <%= form_with(model: @employee, url: employees_path, method: :post, local: true, class: "space-y-8 divide-y divide-gray-200") do |f| %>
+    <% if @employee.errors.any? %>
+      <div class="bg-red-50 p-4 rounded mb-6">
+        <h3 class="text-sm font-medium text-red-800">
+          <%= pluralize(@employee.errors.count, "erreur") %> ont empêché la sauvegarde :
+        </h3>
+        <ul class="mt-2 text-sm text-red-700 list-disc list-inside">
+          <% @employee.errors.full_messages.each do |msg| %>
+            <li><%= msg %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="space-y-8 divide-y divide-gray-200">
+      <div>
+        <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+          <div class="sm:col-span-3">
+            <%= f.label :first_name, "Prénom", class: "block text-sm font-medium text-gray-700" %>
+            <div class="mt-1">
+              <%= f.text_field :first_name, class: "shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
+            </div>
+          </div>
+
+          <div class="sm:col-span-3">
+            <%= f.label :last_name, "Nom", class: "block text-sm font-medium text-gray-700" %>
+            <div class="mt-1">
+              <%= f.text_field :last_name, class: "shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
+            </div>
+          </div>
+
+          <div class="sm:col-span-4">
+            <%= f.label :email, "Email", class: "block text-sm font-medium text-gray-700" %>
+            <div class="mt-1">
+              <%= f.email_field :email, class: "shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pt-5">
+      <div class="flex justify-end">
+        <%= link_to 'Annuler', employees_path, class: "bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50" %>
+        <%= f.submit "Inviter", class: "ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700" %>
+      </div>
+    </div>
+  <% end %>
+</div>

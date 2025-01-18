@@ -1,0 +1,105 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <%= link_to employee_surveys_path, class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 mb-4" do %>
+    <svg class="mr-2 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+    </svg>
+    Retour aux sondages
+  <% end %>
+
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">
+      Vos réponses : <%= @survey.title %>
+    </h1>
+  </div>
+
+  <!-- Progression par thème -->
+  <div class="bg-white rounded-lg shadow overflow-hidden mb-8">
+    <div class="px-4 py-5 sm:p-6">
+      <h2 class="text-lg font-medium text-gray-900 mb-4">Progression par thème</h2>
+      <div class="space-y-4">
+        <% @theme_stats.each do |theme_stat| %>
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-sm font-medium text-gray-900">
+                <%= theme_stat[:theme].name %>
+              </h3>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= theme_stat[:completion_rate] == 100 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' %>">
+                <%= theme_stat[:completion_rate] %>%
+              </span>
+            </div>
+            <div class="relative">
+              <div class="overflow-hidden h-2 text-xs flex rounded bg-gray-200">
+                <div style="width:<%= theme_stat[:completion_rate] %>%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-indigo-600"></div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Réponses par thème -->
+  <div class="space-y-8">
+    <% @theme_stats.each do |theme_stat| %>
+      <div class="bg-white shadow sm:rounded-lg overflow-hidden">
+        <div class="px-4 py-5 sm:px-6">
+          <h3 class="text-lg leading-6 font-medium text-gray-900">
+            <%= theme_stat[:theme].name %>
+          </h3>
+        </div>
+
+        <div class="border-t border-gray-200">
+          <ul class="divide-y divide-gray-200">
+            <% theme_stat[:questions].each do |question_data| %>
+              <li class="px-4 py-4 sm:px-6">
+                <div class="text-sm font-medium text-gray-900 mb-2">
+                  <%= question_data[:question].content %>
+                </div>
+
+                <% if question_data[:answered] %>
+                  <div class="mt-2 text-sm text-gray-500">
+                    <% case question_data[:question].question_type %>
+                    <% when 'single_choice', 'multiple_choice' %>
+                      <div class="bg-gray-50 rounded p-3">
+                        <%= question_data[:response] %>
+                      </div>
+
+                    <% when 'ranking' %>
+                      <div class="bg-gray-50 rounded p-3 space-y-2">
+                        <% question_data[:response].split("\n").each do |rank| %>
+                          <div class="flex items-center space-x-2">
+                            <span class="text-gray-900 font-medium"><%= rank %></span>
+                          </div>
+                        <% end %>
+                      </div>
+
+                    <% when 'open' %>
+                      <div class="bg-gray-50 rounded p-3">
+                        <%= simple_format(question_data[:response], class: "mb-0") %>
+                      </div>
+                    <% end %>
+                  </div>
+                <% else %>
+                  <div class="text-sm text-gray-500 italic">
+                    Pas de réponse fournie
+                  </div>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Boutons d'export -->
+  <div class="flex justify-end mt-8">
+    <%= link_to qvt_results_employee_survey_path(@survey, format: :pdf),
+        class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm" do %>
+      <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      Télécharger en PDF
+    <% end %>
+  </div>
+</div>

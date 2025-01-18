@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8'>
+  <style>
+     body {
+       font-family: Arial, sans-serif;
+       margin: 40px;
+       color: #111827;
+     }
+     .header {
+       margin-bottom: 40px;
+     }
+     .header h1 {
+       font-size: 24px;
+       margin: 0;
+       color: #111827;
+     }
+     .header p {
+       color: #6B7280;
+       font-size: 14px;
+       margin: 8px 0;
+     }
+     .stats-table {
+        width: 100%;
+        margin: 60px 0;
+        padding: 0 40px;
+      }
+
+      .stats-table td {
+        width: 33.33%;
+        padding-right: 40px;
+        vertical-align: top;
+      }
+
+      .stat-label {
+        font-size: 24px;
+        color: #111827;
+        margin-bottom: 20px;
+        font-weight: normal;
+      }
+
+      .stat-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #4F46E5;
+      }
+
+      .stat-subtext {
+        font-size: 20px;
+        color: #6B7280;
+        font-weight: normal;
+        margin-left: 12px;
+      }
+     .values-list {
+       background: white;
+       border-radius: 8px;
+       padding: 20px;
+     }
+     .value-item {
+       padding: 20px 0;
+       border-bottom: 1px solid #E5E7EB;
+     }
+     .value-header {
+       display: flex;
+       justify-content: space-between;
+       align-items: flex-start;
+       margin-bottom: 10px;
+     }
+     .value-index {
+       font-size: 24px;
+       color: #9CA3AF;
+       width: 30px;
+       flex-shrink: 0;
+     }
+     .value-content {
+       flex: 1;
+       padding-right: 20px;
+     }
+     .value-title {
+       font-size: 18px;
+       margin: 0;
+     }
+     .value-category {
+       color: #4F46E5;
+       font-size: 12px;
+     }
+     .value-description {
+       color: #6B7280;
+       font-size: 14px;
+       margin: 8px 0;
+     }
+     .value-rating {
+       text-align: right;
+       min-width: 100px;
+       flex-shrink: 0;
+     }
+     .rating-value {
+       font-size: 24px;
+       font-weight: bold;
+       margin-bottom: 4px;
+     }
+     .rating-count {
+       font-size: 12px;
+       color: #6B7280;
+     }
+     .progress-bar {
+       height: 8px;
+       background: #E5E7EB;
+       border-radius: 4px;
+       margin: 10px 0;
+     }
+     .progress-fill {
+       height: 100%;
+       background: #4F46E5;
+       border-radius: 4px;
+     }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1><%= @survey.title %></h1>
+    <p>
+      Date de fin : <%= l @survey.end_date, format: :long %> ·
+      <%= @survey.closed? ? 'Terminé' : 'En cours' %>
+    </p>
+  </div>
+
+<% total_employees = @survey.company.employees.count %>
+<% responding_employees = @survey.responses.joins(:employee)
+                                .where(employees: { company_id: @survey.company_id })
+                                .select('DISTINCT employee_id').count %>
+<% participation_rate = total_employees > 0 ? (responding_employees.to_f / total_employees * 100).round : 0 %>
+<% avg_global = @survey.responses.joins(:employee)
+                      .where(employees: { company_id: @survey.company_id })
+                      .average(:rating)&.round(2) || 0 %>
+<% remaining_days = (@survey.end_date.to_date - Date.current).to_i %>
+
+<table class="stats-table">
+  <tr>
+    <td>
+      <div class="stat-label">Taux de participation</div>
+      <div class="stat-value"><%= participation_rate %>%</div>
+    </td>
+    <td>
+      <div class="stat-label">Employés participants</div>
+      <div class="stat-value">
+        <%= responding_employees %>
+        <span class="stat-subtext">sur <%= total_employees %> employés</span>
+      </div>
+    </td>
+    <td>
+      <div class="stat-label">Temps restant</div>
+      <div class="stat-value"><%= remaining_days %> jours</div>
+    </td>
+  </tr>
+</table>
+
+  <% if @survey.company_values.any? %>
+    <div class="values-list">
+      <h2>Classement des valeurs</h2>
+      <% @survey.company_values.includes(:value_category)
+            .map { |value|
+              company_responses = value.responses.joins(:employee)
+                                     .where(employees: { company_id: @survey.company_id })
+              avg_rating = company_responses.average(:rating)&.round(2) || 0
+              responses_count = company_responses.count
+              [value, avg_rating, responses_count]
+            }
+            .sort_by { |_, avg, _| -avg }
+            .each_with_index do |(value, avg_rating, responses_count), index| %>
+        <div class="value-item">
+          <div class="value-header">
+            <div class="value-index"><%= index + 1 %></div>
+            <div class="value-content">
+              <h3 class="value-title">
+                <%= value.name %>
+                <span class="value-category">
+                  <%= value.value_category&.name %>
+                </span>
+              </h3>
+              <p class="value-description"><%= value.description %></p>
+            </div>
+            <div class="value-rating">
+              <% if responses_count > 0 %>
+                <div class="rating-value"><%= avg_rating %>/10</div>
+                <div class="rating-count"><%= responses_count %> réponses</div>
+              <% else %>
+                <div class="rating-count">Pas encore de réponse</div>
+              <% end %>
+            </div>
+          </div>
+          <% if responses_count > 0 %>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: <%= (avg_rating / 10.0 * 100).round %>%"></div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div style="text-align: center; padding: 40px;">
+      <p>Aucune valeur dans ce sondage</p>
+      <p style="color: #6B7280;">Contactez l'administrateur pour ajouter des valeurs.</p>
+    </div>
+  <% end %>
+</body>
+</html>

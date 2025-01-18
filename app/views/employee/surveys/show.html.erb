@@ -1,0 +1,156 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8" data-controller="survey">
+ <div class="max-w-5xl w-full space-y-8">
+   <div class="text-center">
+     <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
+       <%= @survey.title %>
+     </h2>
+     <div class="mt-2 flex justify-between items-center text-sm text-gray-500">
+       <span id="question-counter" class="hidden">
+         Question <span id="current-question">1</span>/<%= @company_values.count %>
+       </span>
+       <span class="ml-auto">Fin le <%= l @survey.end_date, format: :long %></span>
+     </div>
+   </div>
+
+   <% if @responses.any?(&:completed?) %>
+     <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
+       <div class="flex">
+         <div class="flex-shrink-0">
+           <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+           </svg>
+         </div>
+         <div class="ml-3">
+           <p class="text-sm text-blue-700">
+             Ce sondage a été finalisé le <%= l @responses.first.completed_at, format: :long %>.
+             Les réponses ne peuvent plus être modifiées.
+           </p>
+         </div>
+       </div>
+     </div>
+   <% end %>
+
+   <div class="mt-8">
+     <% @grouped_values.each_with_index do |(category, values), category_index| %>
+       <!-- Carte d'introduction de la catégorie -->
+       <div class="value-card <%= category_index == 0 ? '' : 'hidden' %>"
+            data-index="<%= category_index * (values.size + 1) + 1 %>"
+            data-category-id="<%= category.id %>"
+            data-card-type="intro">
+         <div class="bg-white overflow-hidden shadow-lg rounded-lg">
+           <div class="px-12 py-8">
+             <h3 class="text-2xl font-bold text-center text-gray-900 mb-6">
+               <%= category.name %>
+             </h3>
+             <p class="text-gray-600 text-center mb-8">
+               <%= category.description %>
+             </p>
+             <div class="flex justify-between items-center mt-8">
+               <div class="flex-1">
+                 <%= link_to(category_index == 0 ? "Quitter" : "Sauvegarder et quitter",
+                     employee_surveys_path,
+                     class: "inline-block px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50") %>
+               </div>
+               <div class="flex-1 text-right">
+                 <button type="button"
+                         class="next-button px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                   Commencer cette catégorie
+                 </button>
+               </div>
+             </div>
+           </div>
+         </div>
+       </div>
+
+       <!-- Cartes des valeurs de la catégorie -->
+       <% values.each_with_index do |value, value_index| %>
+         <div class="value-card hidden"
+              data-index="<%= category_index * (values.size + 1) + value_index + 2 %>"
+              data-category-id="<%= category.id %>"
+              data-card-type="value">
+           <div class="mb-4 text-center">
+             <span class="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
+               <%= category.name %>
+             </span>
+           </div>
+           <div class="bg-white overflow-hidden shadow-lg rounded-lg">
+             <div class="px-12 py-8">
+               <h3 class="text-2xl font-bold text-center text-gray-900 mb-6">
+                 <%= value.name %>
+               </h3>
+               <p class="text-gray-600 text-center mb-8">
+                 <%= value.description %>
+               </p>
+               <% response = @responses.find { |r| r.company_value_id == value.id } %>
+               <%= form_with(
+                 url: response ?
+                   employee_survey_response_path(@survey, response, company_value_id: value.id) :
+                   employee_survey_responses_path(@survey, company_value_id: value.id),
+                 method: response ? :patch : :post,
+                 class: "space-y-6",
+                 data: {
+                   remote: true,
+                   type: 'json'
+                 }
+               ) do |f| %>
+                 <%= f.hidden_field :authenticity_token, value: form_authenticity_token %>
+                <div class="flex justify-center flex-wrap gap-2 sm:gap-4 md:gap-6">
+                 <% (1..10).each do |rating| %>
+                   <label class="rating-option">
+                     <%= radio_button_tag 'rating', rating,
+                         response&.rating == rating,
+                         class: "hidden rating-input",
+                         disabled: response&.completed?,
+                         "data-action": "click->survey#handleRating" %>
+                     <div class="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 flex items-center justify-center rounded-full border-2 cursor-pointer
+                           <%= response&.completed? ? 'opacity-50 cursor-not-allowed' : 'hover:bg-indigo-50 hover:border-indigo-500' %>
+                           <%= response&.rating == rating ? 'bg-indigo-100 border-indigo-500' : 'border-gray-300' %>
+                           <%= rating <= 2 ? 'bg-red-100 border-red-500' : '' %>
+                           <%= rating > 2 && rating <= 4 ? 'bg-orange-100 border-orange-500' : '' %>
+                           <%= rating > 4 && rating <= 6 ? 'bg-yellow-100 border-yellow-500' : '' %>
+                           <%= rating > 6 && rating <= 8 ? 'bg-lime-100 border-lime-500' : '' %>
+                           <%= rating > 8 ? 'bg-green-100 border-green-500' : '' %>">
+                       <span class="text-sm sm:text-base font-medium
+                           <%= rating <= 2 ? 'text-gray-900' : '' %>
+                           <%= rating > 2 && rating <= 4 ? 'text-gray-900' : '' %>
+                           <%= rating > 4 && rating <= 6 ? 'text-gray-900' : '' %>
+                           <%= rating > 6 && rating <= 8 ? 'text-gray-900' : '' %>
+                           <%= rating > 8 ? 'text-gray-900' : '' %>">
+                         <%= rating %>
+                       </span>
+                     </div>
+                   </label>
+                 <% end %>
+                </div>
+               <% end %>
+
+               <div class="flex justify-end mt-8">
+                 <% if category_index == @grouped_values.size - 1 && value_index == values.size - 1 %>
+                   <% if @responses.none?(&:completed?) %>
+                     <%= form_with(url: complete_employee_survey_path(@survey), method: :post, data: { turbo: true }) do |f| %>
+                       <%= f.submit "Terminer le sondage",
+                           class: "px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700",
+                           data: {
+                             confirm: "Êtes-vous sûr ? Une fois le sondage terminé, vous ne pourrez plus modifier vos réponses."
+                           }
+                       %>
+                     <% end %>
+                   <% else %>
+                     <%= link_to "Retour aux sondages", employee_surveys_path,
+                         class: "px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700" %>
+                   <% end %>
+                 <% else %>
+                   <button type="button"
+                           class="next-button px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                     Suivant
+                   </button>
+                 <% end %>
+               </div>
+             </div>
+           </div>
+         </div>
+       <% end %>
+     <% end %>
+   </div>
+ </div>
+</div>

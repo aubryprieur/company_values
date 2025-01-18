@@ -1,0 +1,167 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <h1 class="text-2xl font-bold text-gray-900">Mes sondages à compléter</h1>
+
+  <% @surveys.each do |survey| %>
+    <div class="mt-8">
+      <% if survey.company_values? %>
+        <!-- Les deux colonnes qui contiennent chaque étape du sondage valeurs -->
+        <div class="grid grid-cols-2 gap-5">
+          <!-- Colonne Étape 1 -->
+          <div class="flex flex-col">
+            <!-- En-tête Étape 1 -->
+            <div class="flex items-center relative mb-8">
+              <div class="h-0.5 <%= survey.completed_by?(current_employee) ? 'bg-green-600' : 'bg-indigo-600' %> flex-1"></div>
+              <div class="flex items-center mx-4">
+                <div class="w-8 h-8 flex items-center justify-center <%= survey.completed_by?(current_employee) ? 'bg-green-600' : 'bg-indigo-600' %> rounded-full">
+                  <svg class="w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+                <span class="text-sm font-medium text-gray-900 ml-3">Évaluation des valeurs</span>
+              </div>
+              <div class="h-0.5 <%= survey.completed_by?(current_employee) ? 'bg-green-600' : 'bg-indigo-600' %> flex-1"></div>
+            </div>
+
+            <!-- Carte Étape 1 -->
+            <div class="bg-white overflow-hidden shadow rounded-lg h-64">
+              <div class="px-4 py-5 sm:p-6 h-full flex flex-col">
+                <div>
+                  <h3 class="text-lg font-medium text-gray-900">
+                    <%= survey.title %> - Étape 1
+                  </h3>
+                  <p class="text-xl font-medium text-gray-900 mt-2">
+                    Donnez votre avis sur des valeurs
+                  </p>
+                  <p class="mt-1 text-sm text-gray-500">
+                    Date limite : <%= l survey.end_date, format: :long %>
+                  </p>
+                  <% if survey.completed_by?(current_employee) %>
+                    <div class="flex items-center text-sm text-green-600 mt-2">
+                      <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                      </svg>
+                      Étape complétée
+                    </div>
+                  <% end %>
+                </div>
+
+                <div class="mt-auto pt-4">
+                  <% if survey.completed_by?(current_employee) %>
+                    <%= link_to 'Voir les résultats',
+                        results_employee_survey_path(survey),
+                        class: "w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700" %>
+                  <% else %>
+                    <%= link_to survey.responses.where(employee: current_employee).any? ? 'Reprendre' : 'Répondre',
+                        employee_survey_path(survey),
+                        class: "w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700" %>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Colonne Étape 2 -->
+          <div class="flex flex-col">
+            <!-- En-tête Étape 2 -->
+            <div class="flex items-center relative mb-8">
+              <div class="h-0.5 <%= survey.custom_values.where(employee: current_employee).any? ? 'bg-green-600' : 'bg-indigo-600' %> flex-1"></div>
+              <div class="flex items-center mx-4">
+                <div class="w-8 h-8 flex items-center justify-center <%= survey.custom_values.where(employee: current_employee).any? ? 'bg-green-600' : 'border-2 border-indigo-600 bg-white' %> rounded-full">
+                  <% if survey.custom_values.where(employee: current_employee).any? %>
+                    <svg class="w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                  <% else %>
+                    <span class="text-indigo-600">2</span>
+                  <% end %>
+                </div>
+                <span class="text-sm font-medium text-gray-900 ml-3">Proposition de valeurs</span>
+              </div>
+              <div class="h-0.5 <%= survey.custom_values.where(employee: current_employee).any? ? 'bg-green-600' : 'bg-indigo-600' %> flex-1"></div>
+            </div>
+
+            <!-- Carte Étape 2 -->
+            <div class="bg-white overflow-hidden shadow rounded-lg h-64">
+              <div class="px-4 py-5 sm:p-6 h-full flex flex-col">
+                <div>
+                  <h3 class="text-lg font-medium text-gray-900">
+                    <%= survey.title %> - Étape 2
+                  </h3>
+                  <p class="text-xl font-medium text-gray-900 mt-2">
+                    Proposez de nouvelles valeurs
+                  </p>
+                  <p class="mt-1 text-sm text-gray-500">
+                    Date limite : <%= l survey.end_date, format: :long %>
+                  </p>
+                  <% if survey.custom_values.where(employee: current_employee).any? %>
+                    <div class="flex items-center text-sm text-green-600 mt-2">
+                      <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                      </svg>
+                      Étape complétée
+                    </div>
+                  <% end %>
+                </div>
+
+                <div class="mt-auto pt-4">
+                  <% if survey.custom_values.where(employee: current_employee).any? %>
+                    <%= link_to "Voir mes propositions",
+                        new_employee_survey_custom_value_path(survey),
+                        class: "w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700" %>
+                  <% elsif survey.completed_by?(current_employee) %>
+                    <%= link_to "Proposer des valeurs",
+                        new_employee_survey_custom_value_path(survey),
+                        class: "w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700" %>
+                  <% else %>
+                    <button disabled class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gray-300 cursor-not-allowed">
+                      Terminez l'étape 1 d'abord
+                    </button>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      <% else %>
+        <!-- Sondage QVT - Carte unique -->
+        <div class="bg-white overflow-hidden shadow rounded-lg h-64">
+          <div class="px-4 py-5 sm:p-6 h-full flex flex-col">
+            <div>
+              <h3 class="text-lg font-medium text-gray-900">
+                <%= survey.title %>
+              </h3>
+              <p class="text-xl font-medium text-gray-900 mt-2">
+                Questionnaire sur la qualité de vie au travail
+              </p>
+              <p class="mt-1 text-sm text-gray-500">
+                Date limite : <%= l survey.end_date, format: :long %>
+              </p>
+              <% if survey.completed_qvt_by?(current_employee) %>
+                <div class="flex items-center text-sm text-green-600 mt-2">
+                  <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                  </svg>
+                  Questionnaire complété
+                </div>
+              <% end %>
+            </div>
+            <div class="mt-auto pt-4">
+              <% if survey.qvt? %>
+                <% if survey.completed_qvt_by?(current_employee) %>
+                  <%= link_to "Voir les résultats",
+                      qvt_results_employee_survey_path(survey),
+                      class: "w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700" %>
+                <% else %>
+                  <%= link_to survey.qvt_responses.where(employee: current_employee).exists? ? "Reprendre le questionnaire" : "Répondre au questionnaire",
+                      answer_theme_employee_survey_path(survey, theme_id: QvtTheme.first.id),
+                      class: "w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700" %>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <h1>Bonjour <%= @employee.first_name %>,</h1>
+
+    <p>
+      Nous n'avons pas encore reçu vos réponses pour le sondage "<%= @survey.title %>".
+    </p>
+
+    <p>
+      En tant que collaborateur de <%= @company.name %>, votre avis est important.
+      Merci de prendre quelques minutes pour répondre à ce sondage.
+    </p>
+
+    <p>
+      Pour accéder au sondage, cliquez sur ce lien :
+      <a href="<%= @url %>">Répondre au sondage</a>
+    </p>
+
+    <p>
+      Date limite de réponse : <%= l @survey.end_date, format: :long %>
+    </p>
+
+    <p>
+      Merci de votre participation,<br>
+      L'équipe <%= @company.name %>
+    </p>
+  </body>
+</html>

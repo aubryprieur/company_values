@@ -1,0 +1,104 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <%= link_to employee_surveys_path, class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 mb-4" do %>
+    <svg class="mr-2 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+    </svg>
+    Retour aux sondages
+  <% end %>
+
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">
+      Vos résultats : <%= @survey.title %>
+    </h1>
+  </div>
+
+  <div class="bg-white rounded-lg shadow p-6 mb-8">
+    <h2 class="text-2xl font-bold mb-6 text-gray-900">
+      Votre profil de valeurs
+    </h2>
+
+    <div class="mb-6">
+      <p class="text-gray-600">
+        Ce graphique montre vos notes moyennes par catégorie de valeurs.
+        Plus la note est élevée, plus cette catégorie de valeurs est importante pour vous.
+      </p>
+    </div>
+
+    <% if @category_averages.present? %>
+      <div data-controller="radar-chart"
+           data-radar-chart-data-value="<%= {
+             datasets: [
+               {
+                 label: 'Vos notes',
+                 data: @category_averages.map { |cat, value| value },
+                 categories: @category_averages.keys
+               }
+             ]
+           }.to_json %>"
+           data-radar-chart-max-value="10"
+           style="height: 400px">
+        <div data-radar-chart-target="chart"></div>
+      </div>
+    <% else %>
+      <div class="text-center py-4">
+        <p class="text-gray-500">Aucune donnée disponible pour le graphique</p>
+      </div>
+    <% end %>
+
+    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+      <% @category_averages.each do |category, average| %>
+        <div class="bg-gray-50 rounded-lg p-4">
+          <h3 class="font-medium text-gray-900"><%= category %></h3>
+          <div class="mt-2 flex items-baseline">
+            <p class="text-2xl font-semibold text-indigo-600"><%= average %></p>
+            <p class="ml-2 text-sm text-gray-500">/10</p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-lg shadow p-6">
+    <h2 class="text-2xl font-bold mb-6 text-gray-900">
+      Détail de vos réponses
+    </h2>
+
+    <div class="space-y-6">
+      <% @company_values.includes(:value_category).group_by(&:value_category).each do |category, values| %>
+        <div>
+          <h3 class="text-lg font-medium text-gray-900 mb-4">
+            <%= category.name %>
+          </h3>
+          <div class="space-y-4">
+            <% values.each do |value| %>
+              <% response = @responses.find { |r| r.company_value_id == value.id } %>
+              <div class="bg-gray-50 rounded-lg p-4">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <h4 class="font-medium text-gray-900"><%= value.name %></h4>
+                    <p class="text-sm text-gray-500 mt-1"><%= value.description %></p>
+                  </div>
+                  <div class="flex items-center space-x-1">
+                    <span class="text-2xl font-semibold text-indigo-600">
+                      <%= response&.rating || "N/A" %>
+                    </span>
+                    <span class="text-sm text-gray-500">/10</span>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="flex justify-end mt-8">
+    <%= link_to results_employee_survey_path(@survey, format: :pdf), class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm" do %>
+      <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      Télécharger en PDF
+    <% end %>
+  </div>
+</div>

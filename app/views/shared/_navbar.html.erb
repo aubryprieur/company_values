@@ -1,0 +1,35 @@
+<nav class="bg-white shadow">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between h-16">
+      <div class="flex">
+        <%= link_to root_path, class: "flex items-center" do %>
+          <span class="text-xl font-bold text-indigo-600">Company Values</span>
+        <% end %>
+      </div>
+      <div class="flex items-center gap-4">
+        <% if company_signed_in? %>
+          <%# Menu pour les entreprises %>
+        <% if current_company.super_admin? %>
+          <%= link_to 'Admin Dashboard', admin_dashboard_path, class: "text-gray-600 hover:text-gray-900" %>
+          <%= link_to 'Gestion des valeurs', admin_company_values_path, class: "text-gray-600 hover:text-gray-900" %>
+        <% end %>
+        <%= link_to 'Sondages', surveys_path, class: "text-gray-600 hover:text-gray-900" %>
+          <%= link_to 'Employés', employees_path, class: "text-gray-600 hover:text-gray-900" %>
+          <%= button_to 'Déconnexion', destroy_company_session_path, method: :delete,
+              class: "text-gray-600 hover:text-gray-900" %>
+        <% elsif employee_signed_in? %>
+          <%# Menu pour les employés %>
+          <%= link_to 'Mes sondages', employee_surveys_path, class: "text-gray-600 hover:text-gray-900" %>
+          <%= button_to 'Déconnexion', destroy_employee_session_path, method: :delete,
+              class: "text-gray-600 hover:text-gray-900" %>
+        <% else %>
+          <%# Menu pour les visiteurs non connectés %>
+          <%= link_to 'Connexion Entreprise', new_company_session_path,
+              class: "text-gray-600 hover:text-gray-900" %>
+          <%= link_to 'Connexion Employé', new_employee_session_path,
+              class: "text-gray-600 hover:text-gray-900" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</nav>

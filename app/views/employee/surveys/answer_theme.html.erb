@@ -1,0 +1,110 @@
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <%# Barre de progression globale %>
+  <div class="mb-8">
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-medium text-gray-900">Progression globale</h3>
+        <span class="text-sm font-medium text-gray-500">
+          <%= @survey.total_completed_questions(current_employee) %> / <%= @survey.total_questions %> questions répondues
+        </span>
+      </div>
+      <div class="flex items-center">
+        <div class="flex-1">
+          <div class="bg-gray-200 rounded-full h-2.5">
+            <div class="bg-indigo-600 h-2.5 rounded-full"
+                 style="width: <%= @survey.completion_percentage(current_employee) %>%">
+            </div>
+          </div>
+        </div>
+        <div class="ml-4 text-sm font-medium text-gray-900">
+          <%= @survey.completion_percentage(current_employee) %>%
+        </div>
+      </div>
+    </div>
+  </div>
+  <%# Retour et navigation %>
+  <div class="flex items-center justify-between mb-8">
+    <%= link_to employee_survey_path(@survey), class: "text-sm text-gray-500 hover:text-gray-700" do %>
+      <svg class="w-5 h-5 inline-block mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+      </svg>
+      Retour aux thèmes
+    <% end %>
+
+    <div class="text-sm text-gray-500">
+      Thème <%= @current_theme_index + 1 %>/<%= @themes.count %>
+    </div>
+  </div>
+
+  <%# Thème actuel %>
+  <div class="bg-white shadow rounded-lg" data-controller="qvt-form" data-theme-id="<%= @theme.id %>">
+    <div class="px-4 py-5 sm:p-6">
+      <h2 class="text-xl font-bold text-gray-900 mb-2"><%= @theme.name %></h2>
+      <% if @theme.description.present? %>
+        <p class="text-sm text-gray-500 mb-6"><%= @theme.description %></p>
+      <% end %>
+
+      <%= form_tag submit_page_employee_survey_qvt_responses_path(@survey),
+            class: "space-y-8" do %>
+
+        <% @theme.qvt_questions.each do |question| %>
+          <% response = current_employee.qvt_responses.find_by(survey: @survey, qvt_question_id: question.id) %>
+
+          <div class="border-t border-gray-200 pt-6 first:border-t-0 first:pt-0">
+            <%# Question content %>
+            <div class="flex items-start">
+              <div class="flex-1">
+                <h3 class="text-base font-medium text-gray-900">
+                  <%= question.content %>
+                </h3>
+                <% if question.required? %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 mt-1">
+                    Obligatoire
+                  </span>
+                <% end %>
+              </div>
+            </div>
+
+            <%# Question inputs %>
+            <div class="mt-4">
+              <%= hidden_field_tag "responses[#{question.id}][qvt_question_id]", question.id %>
+              <%= hidden_field_tag "responses[#{question.id}][question_type]", question.question_type %>
+
+              <%= render "employee/surveys/question_types/#{question.question_type}",
+                        question: question,
+                        response: response %>
+            </div>
+          </div>
+        <% end %>
+
+        <%# Boutons d'action %>
+        <div class="flex items-center justify-between pt-6 border-t border-gray-200">
+          <div data-qvt-form-target="themeStatus">
+            <%= render 'theme_status', theme: @theme, survey: @survey %>
+          </div>
+
+          <div class="flex items-center space-x-4">
+            <% if @next_theme %>
+              <%= button_tag type: 'submit',
+                            class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700",
+                            data: { action: "qvt-form#submitForm" } do %>
+                Thème suivant
+                <svg class="ml-2 -mr-1 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                </svg>
+              <% end %>
+            <% else %>
+              <%= button_tag type: 'submit',
+                            class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700",
+                            data: { action: "qvt-form#submitAndFinish" } do %>
+                Enregistrer définitivement et quitter le sondage
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+
+        <div data-qvt-form-target="alert" class="hidden"></div>
+      <% end %>
+    </div>
+  </div>
+</div>

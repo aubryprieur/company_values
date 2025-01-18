@@ -1,0 +1,83 @@
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+ <div class="md:flex md:items-center md:justify-between mb-8">
+   <div class="min-w-0 flex-1">
+     <h2 class="text-2xl font-bold text-gray-900">Proposez jusqu'à 3 nouvelles valeurs</h2>
+     <p class="mt-2 text-sm text-gray-500">Ces propositions seront étudiées par votre entreprise</p>
+   </div>
+ </div>
+
+ <!-- Valeurs existantes -->
+ <% if @existing_values.any? %>
+   <div class="mb-12">
+     <h3 class="text-lg font-semibold text-gray-900 mb-6">Vos propositions de valeurs</h3>
+     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+       <% @existing_values.each do |value| %>
+         <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg p-6 shadow-sm border border-indigo-200">
+           <h4 class="text-lg font-medium text-indigo-900 mb-2"><%= value.name %></h4>
+           <p class="text-sm text-indigo-700"><%= value.description %></p>
+         </div>
+       <% end %>
+     </div>
+   </div>
+ <% end %>
+
+ <!-- Formulaire pour nouvelles valeurs -->
+ <% if @remaining_slots > 0 %>
+   <%= form_tag employee_survey_custom_values_path(@survey), method: :post, class: "space-y-8" do %>
+     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+       <% @remaining_slots.times do |i| %>
+         <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+           <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-3">
+             <h3 class="text-lg font-medium text-white">Nouvelle valeur <%= i + 1 %></h3>
+           </div>
+
+           <div class="p-6 space-y-6">
+             <div>
+               <%= label_tag "custom_values[#{i}][name]", "Nom de la valeur", class: "block text-sm font-medium text-gray-700" %>
+               <%= text_field_tag "custom_values[#{i}][name]", nil, class: "mt-1 block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md" %>
+             </div>
+
+             <div>
+               <%= label_tag "custom_values[#{i}][description]", "Description", class: "block text-sm font-medium text-gray-700" %>
+               <%= text_area_tag "custom_values[#{i}][description]", nil, rows: 4, class: "mt-1 block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md" %>
+             </div>
+           </div>
+         </div>
+       <% end %>
+     </div>
+
+     <div class="flex justify-between items-center mt-12 pt-6 border-t border-gray-200">
+       <%= link_to employee_surveys_path, class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" do %>
+         <svg class="mr-2 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+         </svg>
+         Retour
+       <% end %>
+
+       <%= submit_tag "Proposer les valeurs", class: "inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700" %>
+     </div>
+   <% end %>
+ <% else %>
+   <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8">
+     <div class="flex">
+       <div class="flex-shrink-0">
+         <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+           <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+         </svg>
+       </div>
+       <div class="ml-3">
+         <p class="text-sm text-yellow-700">
+           Vous avez atteint le nombre maximum de valeurs proposées (3).
+         </p>
+       </div>
+     </div>
+   </div>
+
+   <%= link_to employee_surveys_path, class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" do %>
+     <svg class="mr-2 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+     </svg>
+     Retour
+   <% end %>
+ <% end %>
+</div>
