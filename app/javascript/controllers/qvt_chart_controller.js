@@ -84,7 +84,6 @@ export default class extends Controller {
               }}
             />
             <Tooltip content={customTooltip} />
-            <Legend />
             <Bar
               dataKey="value"
               name="Pourcentage de réponses"
