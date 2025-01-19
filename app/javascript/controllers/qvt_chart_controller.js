@@ -89,6 +89,21 @@ export default class extends Controller {
               name="Pourcentage de réponses"
               fill={themeColor}
               radius={[4, 4, 0, 0]}
+              label={(props) => {
+                const { x, y, width, value } = props;
+                return (
+                  <text
+                    x={x + width / 2}
+                    y={y - 10}
+                    fill="#6B7280"
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fontSize={12}
+                  >
+                    {`${value.toFixed(1)}%`}
+                  </text>
+                );
+              }}
             />
           </BarChart>
         </ResponsiveContainer>
