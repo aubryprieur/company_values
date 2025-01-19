@@ -1,68 +1,172 @@
-<div class="header">
-  <h1 class="title"><%= @survey.title %></h1>
-  <p class="subtitle">Rapport généré le <%= l Time.current, format: :long %></p>
-</div>
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 40px;
+      background-color: white;
+      color: #374151;
+    }
 
-<!-- Statistiques globales -->
-<div class="section">
-  <h2 class="category-title">Statistiques globales</h2>
-  <div class="value-card">
-    <div class="value-title">Taux de participation</div>
-    <div class="stats">
-      <div class="stat-item">
-        <strong><%= (@responding_employees.to_f / @total_employees * 100).round(1) %>%</strong>
-        des employés ont participé (<%= @responding_employees %>/<%= @total_employees %> employés)
-      </div>
-    </div>
+    .section-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #111827;
+      margin: 30px 0 20px 0;
+      padding-bottom: 5px;
+      border-bottom: 1px solid #E5E7EB;
+    }
+
+    .theme-section {
+      margin-bottom: 40px;
+    }
+
+    .question-block {
+      background: #fff;
+      padding: 20px;
+      margin-bottom: 15px; /* Réduit de 30px à 15px */
+    }
+
+    .question-title {
+      font-weight: bold;
+      font-size: 16px;
+      color: #111827;
+      margin-bottom: 10px;
+    }
+
+    .chart {
+      width: 100%;
+      margin: 10px 0;
+    }
+
+    .global-stats {
+      background: #F9FAFB;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      color: #9CA3AF;
+      font-size: 12px;
+      border-top: 1px solid #E5E7EB;
+      padding-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Le reste du code reste identique -->
+  <div class="section-title">Statistiques globales</div>
+  <div class="global-stats">
+    <strong>Taux de participation : <%= (@survey.qvt_completion_rate).round(1) %>%</strong>
+    (<%= @responding_employees %>/<%= @total_employees %> employés)
   </div>
-</div>
 
-<!-- Résultats par thème -->
-<% @theme_stats.each do |theme_stat| %>
-  <div class="section">
-    <h2 class="category-title"><%= theme_stat[:theme].name %></h2>
+  <%
+    theme_colors = {
+      1 => "#6366f1", # Conditions de travail - Indigo
+      2 => "#2dd4bf", # Relations professionnelles - Teal
+      3 => "#f59e0b", # Santé et bien-être - Amber
+      4 => "#ec4899", # Reconnaissance et développement - Pink
+      5 => "#8b5cf6", # Communication et management - Violet
+      6 => "#10b981", # Perspectives globales - Emerald
+      7 => "#6b7280"  # Suggestions libres - Gray
+    }
+  %>
 
-    <div class="questions-grid">
+  <% @theme_stats.each_with_index do |theme_stat, theme_index| %>
+    <div class="theme-section">
+      <div class="section-title"><%= theme_stat[:theme].name %></div>
+
       <% theme_stat[:questions].each do |question_data| %>
-        <div class="question-card">
-          <h3 class="value-title"><%= question_data[:question].content %></h3>
+        <div class="question-block">
+          <div class="question-title">
+            <%= question_data[:question].content %>
+          </div>
 
           <% case question_data[:question].question_type %>
           <% when 'single_choice', 'multiple_choice' %>
-            <div class="stats">
-              <% question_data[:stats].each do |stat| %>
-                <div class="stat-item theme-<%= theme_stat[:theme].id % 7 + 1 %>">
-                  <div class="response-stat">
-                    <div class="response-label">
-                      <%= stat[:label] %>
-                    </div>
-                    <div class="response-value">
-                      <%= stat[:value] %>% (<%= stat[:count] %> réponses)
-                    </div>
-                  </div>
-                  <div class="progress-container">
-                    <div class="progress-bar" style="width: <%= stat[:value] %>%"></div>
-                  </div>
-                </div>
+            <%
+              bar_height = 30
+              bar_gap = 15
+              margin_left = 150
+              margin_right = 50
+              chart_width = 800
+              chart_height = (question_data[:stats].length * (bar_height + bar_gap)) + 20
+              bar_width = chart_width - margin_left - margin_right
+              theme_color = theme_colors[(theme_index % 7) + 1] || theme_colors[1]
+            %>
+
+            <svg width="100%" height="<%= chart_height %>" viewBox="0 0 <%= chart_width %> <%= chart_height %>" class="chart">
+              <% question_data[:stats].each_with_index do |stat, index| %>
+                <% y_position = index * (bar_height + bar_gap) + 10 %>
+
+                <!-- Label text (à gauche) -->
+                <text
+                  x="<%= margin_left - 10 %>"
+                  y="<%= y_position + (bar_height / 2) %>"
+                  fill="#6B7280"
+                  font-size="14"
+                  text-anchor="end"
+                  dominant-baseline="middle"
+                >
+                  <%= stat[:label] %>
+                </text>
+
+                <!-- Background bar -->
+                <rect
+                  x="<%= margin_left %>"
+                  y="<%= y_position %>"
+                  width="<%= bar_width %>"
+                  height="<%= bar_height %>"
+                  fill="#F3F4F6"
+                  rx="4"
+                />
+
+                <!-- Value bar -->
+                <rect
+                  x="<%= margin_left %>"
+                  y="<%= y_position %>"
+                  width="<%= (stat[:value] / 100.0) * bar_width %>"
+                  height="<%= bar_height %>"
+                  fill="<%= theme_color %>"
+                  rx="4"
+                />
+
+                <!-- Percentage text (à droite) -->
+                <text
+                  x="<%= margin_left + bar_width + 10 %>"
+                  y="<%= y_position + (bar_height / 2) %>"
+                  fill="#6B7280"
+                  font-size="14"
+                  dominant-baseline="middle"
+                >
+                  <%= stat[:value] %>%
+                </text>
               <% end %>
-            </div>
+            </svg>
+
           <% when 'open' %>
-            <div class="stats">
+            <div class="open-responses">
               <% if question_data[:stats].any? %>
                 <% question_data[:stats].each do |answer| %>
-                  <div class="stat-item"><%= answer %></div>
+                  <div class="open-response"><%= answer %></div>
                 <% end %>
               <% else %>
-                <div class="stat-item">Aucune réponse fournie</div>
+                <div class="open-response">Aucune réponse fournie</div>
               <% end %>
             </div>
           <% end %>
         </div>
       <% end %>
     </div>
-  </div>
-<% end %>
+  <% end %>
 
-<div class="footer">
-  Document généré le <%= l Time.current, format: :long %>
-</div>
+  <div class="footer">
+    Document généré le <%= l Time.current, format: :long %>
+  </div>
+</body>
+</html>
