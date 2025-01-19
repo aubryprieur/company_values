@@ -63,6 +63,55 @@
         color: #9CA3AF;
         font-size: 12px;
       }
+      .questions-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+      }
+
+      .question-card {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      .progress-container {
+        width: 100%;
+        background-color: #F3F4F6;
+        border-radius: 4px;
+        height: 20px;
+        margin: 8px 0;
+      }
+
+      .progress-bar {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.3s ease;
+      }
+
+      .theme-1 .progress-bar { background-color: #5046E5; }
+      .theme-2 .progress-bar { background-color: #3B82F6; }
+      .theme-3 .progress-bar { background-color: #6366F1; }
+      .theme-4 .progress-bar { background-color: #8B5CF6; }
+      .theme-5 .progress-bar { background-color: #A855F7; }
+      .theme-6 .progress-bar { background-color: #D946EF; }
+      .theme-7 .progress-bar { background-color: #EC4899; }
+
+      .response-stat {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+      }
+
+      .response-label {
+        font-size: 14px;
+        color: #374151;
+        margin-bottom: 4px;
+      }
+
+      .response-value {
+        font-size: 14px;
+        font-weight: bold;
+        color: #111827;
+      }
     </style>
   </head>
   <body onload="window.status='ready'">

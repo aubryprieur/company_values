@@ -125,8 +125,10 @@ class SurveysController < ApplicationController
         render pdf: "resultats_qvt_#{@survey.title}",
                template: "surveys/qvt_results",
                layout: "layouts/pdf",
-               formats: [:pdf, :html],
-               disposition: 'attachment'
+               orientation: 'Landscape',
+               page_size: 'A4',
+               margin: { top: 15, bottom: 15, left: 15, right: 15 },
+               footer: { right: '[page] sur [topage]' }
       end
     end
   end

@@ -1,0 +1,68 @@
+<div class="header">
+  <h1 class="title"><%= @survey.title %></h1>
+  <p class="subtitle">Rapport généré le <%= l Time.current, format: :long %></p>
+</div>
+
+<!-- Statistiques globales -->
+<div class="section">
+  <h2 class="category-title">Statistiques globales</h2>
+  <div class="value-card">
+    <div class="value-title">Taux de participation</div>
+    <div class="stats">
+      <div class="stat-item">
+        <strong><%= (@responding_employees.to_f / @total_employees * 100).round(1) %>%</strong>
+        des employés ont participé (<%= @responding_employees %>/<%= @total_employees %> employés)
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Résultats par thème -->
+<% @theme_stats.each do |theme_stat| %>
+  <div class="section">
+    <h2 class="category-title"><%= theme_stat[:theme].name %></h2>
+
+    <div class="questions-grid">
+      <% theme_stat[:questions].each do |question_data| %>
+        <div class="question-card">
+          <h3 class="value-title"><%= question_data[:question].content %></h3>
+
+          <% case question_data[:question].question_type %>
+          <% when 'single_choice', 'multiple_choice' %>
+            <div class="stats">
+              <% question_data[:stats].each do |stat| %>
+                <div class="stat-item theme-<%= theme_stat[:theme].id % 7 + 1 %>">
+                  <div class="response-stat">
+                    <div class="response-label">
+                      <%= stat[:label] %>
+                    </div>
+                    <div class="response-value">
+                      <%= stat[:value] %>% (<%= stat[:count] %> réponses)
+                    </div>
+                  </div>
+                  <div class="progress-container">
+                    <div class="progress-bar" style="width: <%= stat[:value] %>%"></div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% when 'open' %>
+            <div class="stats">
+              <% if question_data[:stats].any? %>
+                <% question_data[:stats].each do |answer| %>
+                  <div class="stat-item"><%= answer %></div>
+                <% end %>
+              <% else %>
+                <div class="stat-item">Aucune réponse fournie</div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<div class="footer">
+  Document généré le <%= l Time.current, format: :long %>
+</div>
