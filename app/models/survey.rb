@@ -4,6 +4,8 @@ class Survey < ApplicationRecord
   has_many :responses, through: :company_values
   has_many :custom_values, dependent: :destroy
   has_many :qvt_responses, dependent: :destroy
+  has_many :survey_participants
+  has_many :employees, through: :survey_participants
 
   enum :survey_type, { company_values: 0, qvt: 1 }
 
@@ -81,6 +83,13 @@ class Survey < ApplicationRecord
 
   def total_completed_questions(employee)
     qvt_responses.where(employee: employee).count
+  end
+
+  def add_participant(employee)
+    survey_participants.create!(
+      employee: employee,
+      invited_at: Time.current
+    )
   end
 
   private

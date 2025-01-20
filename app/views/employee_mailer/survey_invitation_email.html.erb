@@ -1,0 +1,8 @@
+<h1>Bonjour <%= @employee.first_name %>,</h1>
+
+<p>Vous êtes invité(e) à participer à un nouveau sondage : <%= @survey.title %></p>
+
+<p>
+  Pour participer, cliquez sur le lien suivant :
+  <%= link_to "Accéder au sondage", @url %>
+</p>

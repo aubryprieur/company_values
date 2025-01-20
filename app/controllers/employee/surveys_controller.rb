@@ -5,12 +5,20 @@ class Employee::SurveysController < ApplicationController
   before_action :set_themes, only: [:show, :answer_theme]
 
   def index
-    @surveys = current_employee.company.surveys
-                             .where('end_date > ?', Time.current)
-    @themes = QvtTheme.all.order(:id) if @surveys.any?(&:qvt?)
+    @surveys = Survey.joins(:survey_participants)
+                    .where(survey_participants: { employee: current_employee })
+                    .where('end_date > ?', Time.current)
   end
 
   def show
+    @survey = Survey.find(params[:id])
+
+    unless current_employee.invited_to_survey?(@survey)
+      redirect_to employee_surveys_path,
+        alert: "Vous n'avez pas été invité à participer à ce sondage."
+      return
+    end
+
     authorize @survey
 
     if @survey.company_values?
@@ -82,6 +90,9 @@ class Employee::SurveysController < ApplicationController
 
   def check_survey_completion
     return unless @survey.company_values? # Ne vérifie que pour les sondages de valeurs
+
+    # Vérifier d'abord si l'employé est invité
+    return unless current_employee.invited_to_survey?(@survey)
 
     if @survey.completed_by?(current_employee)
       redirect_to results_employee_survey_path(@survey),

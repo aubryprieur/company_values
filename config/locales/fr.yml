@@ -82,6 +82,11 @@ fr:
           has_many: "Impossible de supprimer l'enregistrement car des %{record} dépendants existent"
         blank: "ne peut pas être vide"
         inclusion: "n'est pas inclus(e) dans la liste"
+      models:
+        employee:
+          attributes:
+            email:
+              taken: "est déjà utilisé"
 
     attributes:
       company:

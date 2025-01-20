@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_01_13_105744) do
+ActiveRecord::Schema[8.0].define(version: 2025_01_20_122911) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -143,6 +143,19 @@ ActiveRecord::Schema[8.0].define(version: 2025_01_13_105744) do
     t.index ["employee_id"], name: "index_responses_on_employee_id"
   end
 
+  create_table "survey_participants", force: :cascade do |t|
+    t.bigint "survey_id", null: false
+    t.bigint "employee_id", null: false
+    t.integer "status", default: 0, null: false
+    t.datetime "invited_at"
+    t.datetime "responded_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["employee_id"], name: "index_survey_participants_on_employee_id"
+    t.index ["survey_id", "employee_id"], name: "index_survey_participants_on_survey_id_and_employee_id", unique: true
+    t.index ["survey_id"], name: "index_survey_participants_on_survey_id"
+  end
+
   create_table "surveys", force: :cascade do |t|
     t.string "title"
     t.datetime "end_date"
@@ -174,5 +187,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_01_13_105744) do
   add_foreign_key "qvt_responses", "surveys"
   add_foreign_key "responses", "company_values"
   add_foreign_key "responses", "employees"
+  add_foreign_key "survey_participants", "employees"
+  add_foreign_key "survey_participants", "surveys"
   add_foreign_key "surveys", "companies"
 end

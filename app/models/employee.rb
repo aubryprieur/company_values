@@ -5,6 +5,8 @@ class Employee < ApplicationRecord
   has_many :responses, dependent: :destroy
   has_many :custom_values, dependent: :destroy
   has_many :qvt_responses, dependent: :destroy
+  has_many :survey_participants
+  has_many :participating_surveys, through: :survey_participants, source: :survey
 
   validates :first_name, presence: true
   validates :last_name, presence: true
@@ -27,5 +29,9 @@ class Employee < ApplicationRecord
 
   def invitation_accepted?
     invitation_accepted_at.present?
+  end
+
+  def invited_to_survey?(survey)
+    survey_participants.exists?(survey: survey)
   end
 end

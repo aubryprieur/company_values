@@ -57,9 +57,20 @@ Rails.application.routes.draw do
       get :rankings
       get :custom_values
       get :download_custom_values
-      # Nouvelles routes pour l'administration des réponses QVT
-      get :qvt_summary    # Pour voir un résumé des réponses QVT
-      get :export_qvt    # Pour exporter les réponses QVT
+      get :qvt_summary
+      get :export_qvt
+    end
+
+    # Nouvelles routes pour la gestion des employés par sondage
+    resources :survey_employees do
+      collection do
+        post :import
+        get :download_template
+        post :send_reminders
+      end
+      member do
+        post :reinvite
+      end
     end
   end
 
